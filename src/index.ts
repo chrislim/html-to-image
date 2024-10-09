@@ -32,7 +32,11 @@ export async function toCanvas<T extends HTMLElement>(
   const { width, height } = getImageSize(node, options)
   const svg = await toSvg(node, options)
   const img = await createImage(svg)
-
+  // HACK until upstream is fixed for Safari.
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  if (isSafari) {
+    await new Promise(resolve => setTimeout(resolve, 3000));
+  }
   const canvas = document.createElement('canvas')
   const context = canvas.getContext('2d')!
   const ratio = options.pixelRatio || getPixelRatio()
