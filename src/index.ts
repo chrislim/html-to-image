@@ -12,13 +12,14 @@ import {
   checkCanvasDimensions,
 } from './util'
 
-async function waitIfSafari() {
+async function waitIfSafari(ms: number | undefined) {
   // HACK until upstream is fixed for Safari.
-  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
   if (isSafari) {
-    await new Promise(resolve => () => { setTimeout(resolve, 3000) });
+    console.log('Waiting...')
+    await new Promise((resolve) => setTimeout(resolve, ms))
   }
-  return isSafari;
+  return isSafari
 }
 
 export async function toSvg<T extends HTMLElement>(
@@ -30,7 +31,7 @@ export async function toSvg<T extends HTMLElement>(
   await embedWebFonts(clonedNode, options)
   await embedImages(clonedNode, options)
   applyStyle(clonedNode, options)
-  await waitIfSafari();
+
   const datauri = await nodeToDataURL(clonedNode, width, height)
   return datauri
 }
@@ -42,7 +43,7 @@ export async function toCanvas<T extends HTMLElement>(
   const { width, height } = getImageSize(node, options)
   const svg = await toSvg(node, options)
   const img = await createImage(svg)
-  await waitIfSafari();
+  await waitIfSafari(3000)
   const canvas = document.createElement('canvas')
   const context = canvas.getContext('2d')!
   const ratio = options.pixelRatio || getPixelRatio()
